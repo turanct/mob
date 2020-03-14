@@ -4,7 +4,7 @@
 
 - It takes the current branch you're on as the "main branch"
 - When you use `mob start`, it creates a wip branch for the current
-  main branch you're on. When you want to switch, you just do
+  main branch you're on. When you want to switch drivers, you just do
 - `mob switch` which creates a wip commit and pushes it to the wip
   branch. It then switches you back to the main branch.
 - On another computer, you can use `mob continue` to continue where you
