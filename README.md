@@ -15,6 +15,18 @@
   can create a deliberate commit.
 
 
+## Installing
+
+1. clone this repo somewhere
+1. symlink the executable to `/usr/local/bin`
+
+```sh
+git clone https://github.com/turanct/mob.git
+cd mob
+ln -s $(pwd)/mob.sh /usr/local/bin/mob
+```
+
+
 ## Commands
 
 - `mob start`
