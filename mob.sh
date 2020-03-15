@@ -92,6 +92,8 @@ main() {
             git branch -d "wip-commit-$BRANCH"
             git branch -D $WIPBRANCH
             git push origin ":$WIPBRANCH"
+
+            git restore --staged .
         fi
         ;;
     *)
