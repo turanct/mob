@@ -47,7 +47,7 @@ main() {
     case $1 in
     switch)
         if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
-            git pull --ff-only origin $BRANCH
+            git pull origin $BRANCH
             git checkout -b $WIPBRANCH || git checkout $WIPBRANCH
             git add .
             git commit -m "wip $WHOAMI" || true
