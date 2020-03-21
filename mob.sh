@@ -65,7 +65,7 @@ main() {
             git reset --soft $ORIGINALBRANCH
             git restore --staged .
             git stash push --include-untracked .
-            git pull origin $WIPBRANCH
+            git pull --rebase origin $WIPBRANCH
             git checkout $ORIGINALBRANCH
             git stash pop
 
