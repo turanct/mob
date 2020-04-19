@@ -47,10 +47,18 @@ main() {
     case $1 in
     switch)
         if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
+            git branch -D $WIPBRANCH || echo "No wip branch to be deleted"
+            git push origin ":$WIPBRANCH" || echo "No remote wip branch to be deleted"
+
+            git stash push --include-untracked .
+            git stash apply
+
             git pull origin $BRANCH
-            git checkout -b $WIPBRANCH || git checkout $WIPBRANCH
+            git checkout -b $WIPBRANCH
+
             git add .
             git commit -m "wip $WHOAMI" || true
+
             git push origin $WIPBRANCH
             git checkout $ORIGINALBRANCH
         fi
