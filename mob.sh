@@ -38,6 +38,44 @@ usage() {
 	EOF
 }
 
+mob-switch() {
+    if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
+        git branch -D $WIPBRANCH || echo "No wip branch to be deleted"
+        git push origin ":$WIPBRANCH" || echo "No remote wip branch to be deleted"
+
+        git stash push --include-untracked .
+        git stash apply
+
+        git pull origin $BRANCH
+        git checkout -b $WIPBRANCH
+
+        git add .
+        git commit -m "wip $WHOAMI" || true
+
+        git push origin $WIPBRANCH
+        git checkout $ORIGINALBRANCH
+    fi
+}
+
+mob-continue() {
+    if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
+        git remote update
+        git pull --rebase origin $BRANCH
+        git checkout $WIPBRANCH
+        git pull --rebase origin $WIPBRANCH
+
+        git reset --soft $ORIGINALBRANCH
+        git restore --staged .
+        git stash push --include-untracked .
+        git pull --rebase origin $WIPBRANCH
+        git checkout $ORIGINALBRANCH
+        git stash pop
+
+        git branch -D $WIPBRANCH
+        git push origin ":$WIPBRANCH"
+    fi
+}
+
 main() {
     if [ $# -eq 0 ]; then
         usage
@@ -46,40 +84,10 @@ main() {
 
     case $1 in
     switch)
-        if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
-            git branch -D $WIPBRANCH || echo "No wip branch to be deleted"
-            git push origin ":$WIPBRANCH" || echo "No remote wip branch to be deleted"
-
-            git stash push --include-untracked .
-            git stash apply
-
-            git pull origin $BRANCH
-            git checkout -b $WIPBRANCH
-
-            git add .
-            git commit -m "wip $WHOAMI" || true
-
-            git push origin $WIPBRANCH
-            git checkout $ORIGINALBRANCH
-        fi
+        mob-switch
         ;;
     continue)
-        if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
-            git remote update
-            git pull --rebase origin $BRANCH
-            git checkout $WIPBRANCH
-            git pull --rebase origin $WIPBRANCH
-
-            git reset --soft $ORIGINALBRANCH
-            git restore --staged .
-            git stash push --include-untracked .
-            git pull --rebase origin $WIPBRANCH
-            git checkout $ORIGINALBRANCH
-            git stash pop
-
-            git branch -D $WIPBRANCH
-            git push origin ":$WIPBRANCH"
-        fi
+        mob-continue
         ;;
     *)
         usage
