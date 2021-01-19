@@ -6,6 +6,7 @@ readonly PROGNAME=$(basename $0)
 readonly ARGS="$@"
 
 readonly WHOAMI=$(whoami)
+readonly LOGFILE=$(mktemp /tmp/wip-mob-logs.XXXXXX)
 
 readonly BRANCH=$(git branch --show-current)
 readonly WIPPREFIX="wip-mob-"
@@ -40,40 +41,60 @@ usage() {
 
 mob-switch() {
     if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
-        git branch -D $WIPBRANCH || echo "No wip branch to be deleted"
-        git push origin ":$WIPBRANCH" || echo "No remote wip branch to be deleted"
+        printf 'log: %s\n' "$LOGFILE"
 
-        git stash push --include-untracked .
-        git stash apply
+        colorline "Deleting local & remote wip branch..."
+        git branch -D $WIPBRANCH >> $LOGFILE 2>&1 || true
+        git push origin ":$WIPBRANCH" >> $LOGFILE 2>&1 || true
 
-        git pull origin $BRANCH
-        git checkout -b $WIPBRANCH
+        colorline "Stashing changes..."
+        git stash push --include-untracked . >> $LOGFILE 2>&1
+        git stash apply >> $LOGFILE 2>&1
 
-        git add .
-        git commit -m "wip $WHOAMI" || true
+        colorline "Making sure we are up-to-date with remote..."
+        git pull origin $BRANCH >> $LOGFILE 2>&1
+        git checkout -b $WIPBRANCH >> $LOGFILE 2>&1
 
-        git push origin $WIPBRANCH
-        git checkout $ORIGINALBRANCH
+        colorline "Creating wip commit..."
+        git add . >> $LOGFILE 2>&1
+        git commit -m "wip $WHOAMI" >> $LOGFILE 2>&1 || true
+
+        colorline "Pushing changes to '$WIPBRANCH'..."
+        git push origin $WIPBRANCH >> $LOGFILE 2>&1
+        git checkout $ORIGINALBRANCH >> $LOGFILE 2>&1
+
+        colorline "Done"
     fi
 }
 
 mob-continue() {
     if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
-        git remote update
-        git pull --rebase origin $BRANCH
-        git checkout $WIPBRANCH
-        git pull --rebase origin $WIPBRANCH
+        printf 'log: %s\n' "$LOGFILE"
 
-        git reset --soft $ORIGINALBRANCH
-        git restore --staged .
-        git stash push --include-untracked .
-        git pull --rebase origin $WIPBRANCH
-        git checkout $ORIGINALBRANCH
-        git stash pop
+        colorline "Making sure we are up-to-date with remote..."
+        git remote update >> $LOGFILE 2>&1
+        git pull --rebase origin $BRANCH >> $LOGFILE 2>&1
+        git checkout $WIPBRANCH >> $LOGFILE 2>&1
+        git pull --rebase origin $WIPBRANCH >> $LOGFILE 2>&1
 
-        git branch -D $WIPBRANCH
-        git push origin ":$WIPBRANCH"
+        colorline "Applying changes to our local branch..."
+        git reset --soft $ORIGINALBRANCH >> $LOGFILE 2>&1
+        git restore --staged . >> $LOGFILE 2>&1
+        git stash push --include-untracked . >> $LOGFILE 2>&1
+        git pull --rebase origin $WIPBRANCH >> $LOGFILE 2>&1
+        git checkout $ORIGINALBRANCH >> $LOGFILE 2>&1
+        git stash pop >> $LOGFILE 2>&1
+
+        colorline "Deleting local & remote wip branch..."
+        git branch -D $WIPBRANCH >> $LOGFILE 2>&1
+        git push origin ":$WIPBRANCH" >> $LOGFILE 2>&1
+
+        colorline "Done"
     fi
+}
+
+colorline() {
+    printf -- '\033[37m-\033[36m %s\033[0m\n' "$1"
 }
 
 main() {
