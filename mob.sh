@@ -20,6 +20,8 @@ else
     readonly CURRENT_BRANCH_IS_WIP=1
 fi
 
+trap 'mob-error $?' EXIT
+
 usage() {
 	cat <<- EOF
 	Usage: $PROGNAME subcommand
@@ -95,6 +97,13 @@ mob-continue() {
 
 colorline() {
     printf -- '\033[37m-\033[36m %s\033[0m\n' "$1"
+}
+
+mob-error() {
+    if [ "$1" != "0" ]; then
+        printf -- '\033[31m %s\033[0m\n' \
+            "⚠️  An error occured. Check the logs to see what happened."
+    fi
 }
 
 main() {
