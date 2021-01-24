@@ -55,6 +55,7 @@ mob-switch() {
 
         colorline "Making sure we are up-to-date with remote..."
         git pull origin $BRANCH >> $LOGFILE 2>&1
+        git push origin $BRANCH >> $LOGFILE 2>&1
         git checkout -b $WIPBRANCH >> $LOGFILE 2>&1
 
         colorline "Creating wip commit..."
