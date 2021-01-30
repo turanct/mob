@@ -45,28 +45,28 @@ mob-switch() {
     if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
         printf 'log: %s\n' "$LOGFILE"
 
-        colorline "Deleting local & remote wip branch..."
+        colorline "🔥 Deleting local & remote wip branch..."
         git branch -D $WIPBRANCH >> $LOGFILE 2>&1 || true
         git push origin ":$WIPBRANCH" >> $LOGFILE 2>&1 || true
 
-        colorline "Stashing changes..."
+        colorline "📦 Stashing changes..."
         git stash push --include-untracked . >> $LOGFILE 2>&1
         git stash apply >> $LOGFILE 2>&1
 
-        colorline "Making sure we are up-to-date with remote..."
+        colorline "🌍 Making sure we are up-to-date with remote..."
         git pull origin $BRANCH >> $LOGFILE 2>&1
         git push origin $BRANCH >> $LOGFILE 2>&1
         git checkout -b $WIPBRANCH >> $LOGFILE 2>&1
 
-        colorline "Creating wip commit..."
+        colorline "🚧 Creating wip commit..."
         git add . >> $LOGFILE 2>&1
         git commit -m "wip $WHOAMI" >> $LOGFILE 2>&1 || true
 
-        colorline "Pushing changes to '$WIPBRANCH'..."
+        colorline "🚀 Pushing changes to '$WIPBRANCH'..."
         git push origin $WIPBRANCH >> $LOGFILE 2>&1
         git checkout $ORIGINALBRANCH >> $LOGFILE 2>&1
 
-        colorline "Done"
+        colorline "🏁 Done"
     fi
 }
 
@@ -74,13 +74,13 @@ mob-continue() {
     if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
         printf 'log: %s\n' "$LOGFILE"
 
-        colorline "Making sure we are up-to-date with remote..."
+        colorline "🌍 Making sure we are up-to-date with remote..."
         git remote update >> $LOGFILE 2>&1
         git pull --rebase origin $BRANCH >> $LOGFILE 2>&1
         git checkout $WIPBRANCH >> $LOGFILE 2>&1
         git pull --rebase origin $WIPBRANCH >> $LOGFILE 2>&1
 
-        colorline "Applying changes to our local branch..."
+        colorline "🔨 Applying changes to our local branch..."
         git reset --soft $ORIGINALBRANCH >> $LOGFILE 2>&1
         git restore --staged . >> $LOGFILE 2>&1
         git stash push --include-untracked . >> $LOGFILE 2>&1
@@ -88,11 +88,11 @@ mob-continue() {
         git checkout $ORIGINALBRANCH >> $LOGFILE 2>&1
         git stash pop >> $LOGFILE 2>&1
 
-        colorline "Deleting local & remote wip branch..."
+        colorline "🔥 Deleting local & remote wip branch..."
         git branch -D $WIPBRANCH >> $LOGFILE 2>&1
         git push origin ":$WIPBRANCH" >> $LOGFILE 2>&1
 
-        colorline "Done"
+        colorline "🏁 Done"
     fi
 }
 
