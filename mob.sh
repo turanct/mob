@@ -2,8 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-readonly PROGNAME=$(basename $0)
-readonly ARGS="$@"
+readonly PROGNAME=$(basename "$0")
+readonly ARGS=( "$@" )
 
 readonly WHOAMI=$(whoami)
 readonly LOGFILE=$(mktemp /tmp/wip-mob-logs.XXXXXX)
@@ -46,25 +46,35 @@ mob-switch() {
         printf 'log: %s\n' "$LOGFILE"
 
         colorline "🔥 Deleting local & remote wip branch..."
-        git branch -D $WIPBRANCH >> $LOGFILE 2>&1 || true
-        git push origin ":$WIPBRANCH" >> $LOGFILE 2>&1 || true
+        {
+            git branch -D "$WIPBRANCH" || true
+            git push origin ":$WIPBRANCH" || true
+        } >> "$LOGFILE" 2>&1
 
         colorline "📦 Stashing changes..."
-        git stash push --include-untracked . >> $LOGFILE 2>&1
-        git stash apply >> $LOGFILE 2>&1
+        {
+            git stash push --include-untracked .
+            git stash apply
+        } >> "$LOGFILE" 2>&1
 
         colorline "🌍 Making sure we are up-to-date with remote..."
-        git pull origin $BRANCH >> $LOGFILE 2>&1
-        git push origin $BRANCH >> $LOGFILE 2>&1
-        git checkout -b $WIPBRANCH >> $LOGFILE 2>&1
+        {
+            git pull origin "$BRANCH"
+            git push origin "$BRANCH"
+            git checkout -b "$WIPBRANCH"
+        } >> "$LOGFILE" 2>&1
 
         colorline "🚧 Creating wip commit..."
-        git add . >> $LOGFILE 2>&1
-        git commit -m "wip $WHOAMI" >> $LOGFILE 2>&1 || true
+        {
+            git add .
+            git commit -m "wip $WHOAMI" || true
+        } >> "$LOGFILE" 2>&1
 
         colorline "🚀 Pushing changes to '$WIPBRANCH'..."
-        git push origin $WIPBRANCH >> $LOGFILE 2>&1
-        git checkout $ORIGINALBRANCH >> $LOGFILE 2>&1
+        {
+            git push origin "$WIPBRANCH"
+            git checkout "$ORIGINALBRANCH"
+        } >> "$LOGFILE" 2>&1
 
         colorline "🏁 Done"
     fi
@@ -75,22 +85,28 @@ mob-continue() {
         printf 'log: %s\n' "$LOGFILE"
 
         colorline "🌍 Making sure we are up-to-date with remote..."
-        git remote update >> $LOGFILE 2>&1
-        git pull --rebase origin $BRANCH >> $LOGFILE 2>&1
-        git checkout $WIPBRANCH >> $LOGFILE 2>&1
-        git pull --rebase origin $WIPBRANCH >> $LOGFILE 2>&1
+        {
+            git remote update
+            git pull --rebase origin "$BRANCH"
+            git checkout "$WIPBRANCH"
+            git pull --rebase origin "$WIPBRANCH"
+        } >> "$LOGFILE" 2>&1
 
         colorline "🔨 Applying changes to our local branch..."
-        git reset --soft $ORIGINALBRANCH >> $LOGFILE 2>&1
-        git restore --staged . >> $LOGFILE 2>&1
-        git stash push --include-untracked . >> $LOGFILE 2>&1
-        git pull --rebase origin $WIPBRANCH >> $LOGFILE 2>&1
-        git checkout $ORIGINALBRANCH >> $LOGFILE 2>&1
-        git stash pop >> $LOGFILE 2>&1
+        {
+            git reset --soft "$ORIGINALBRANCH"
+            git restore --staged .
+            git stash push --include-untracked .
+            git pull --rebase origin "$WIPBRANCH"
+            git checkout "$ORIGINALBRANCH"
+            git stash pop
+        } >> "$LOGFILE" 2>&1
 
         colorline "🔥 Deleting local & remote wip branch..."
-        git branch -D $WIPBRANCH >> $LOGFILE 2>&1
-        git push origin ":$WIPBRANCH" >> $LOGFILE 2>&1
+        {
+            git branch -D "$WIPBRANCH"
+            git push origin ":$WIPBRANCH"
+        } >> "$LOGFILE" 2>&1
 
         colorline "🏁 Done"
     fi
@@ -126,4 +142,4 @@ main() {
     esac
 }
 
-main $ARGS
+main "${ARGS[@]}"
