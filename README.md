@@ -5,9 +5,10 @@
 - It takes the current branch you're on as the "main branch"
 - When you want to switch drivers, you just do `mob switch`
   which creates a wip commit and pushes it to a wip branch.
-  It then takes you back to the main branch.
-- On another computer, you can use `mob continue` to continue where you
-  left off with the previous driver.
+  It then takes you back to the "main branch".
+- On another computer, you can use `mob continue` on the 
+  "main branch" to continue where you left off with the
+  previous driver.
 
 
 ## Installing
