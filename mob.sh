@@ -35,12 +35,12 @@ usage() {
 	left off with the previous driver. It will take the wip commits from
 	the wip branch and apply them on the "main branch".
 
-    This essentially works like a "git stash" and "git stash pop" where
-    the stash is a remote branch with just one commit.
+	This essentially works like a "git stash" and "git stash pop" where
+	the stash is a remote branch with just one commit.
 
 	SUBCOMMANDS:
-	   switch        Commit and push everything that changed on the wip branch.
-	   continue      Continue working on the wip branch after somebody switched.
+	    switch        Commit and push everything that changed on the wip branch.
+	    continue      Continue working on the wip branch after somebody switched.
 	EOF
 }
 
