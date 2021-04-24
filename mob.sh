@@ -87,6 +87,14 @@ mob-continue() {
     if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
         printf 'log: %s\n' "$LOGFILE"
 
+        colorline "🛁 Making sure working directory is clean..."
+        {
+            if [ -n "$(git status --porcelain)" ]; then
+                echo "Working directory is not clean, aborting."
+                return 1;
+            fi
+        } >> "$LOGFILE" 2>&1
+
         colorline "🌍 Making sure we are up-to-date with remote..."
         (
             git remote update
