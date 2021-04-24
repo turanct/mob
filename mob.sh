@@ -48,6 +48,14 @@ mob-switch() {
     if [ $CURRENT_BRANCH_IS_WIP == 0 ]; then
         printf 'log: %s\n' "$LOGFILE"
 
+        colorline "🕵️‍♂️  Making sure there are changes..."
+        {
+            if [ -z "$(git status --porcelain)" ]; then
+                echo "Working directory is clean, aborting."
+                return 1;
+            fi
+        } >> "$LOGFILE" 2>&1
+
         colorline "🔥 Deleting local & remote wip branch..."
         (
             git branch -D "$WIPBRANCH" || true
