@@ -49,35 +49,35 @@ mob-switch() {
         printf 'log: %s\n' "$LOGFILE"
 
         colorline "🔥 Deleting local & remote wip branch..."
-        {
+        (
             git branch -D "$WIPBRANCH" || true
             git push origin ":$WIPBRANCH" || true
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "📦 Stashing changes..."
-        {
+        (
             git stash push --include-untracked .
             git stash apply
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "🌍 Making sure we are up-to-date with remote..."
-        {
+        (
             git pull origin "$BRANCH"
             git push origin "$BRANCH"
             git checkout -b "$WIPBRANCH"
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "🚧 Creating wip commit..."
-        {
+        (
             git add .
             git commit -m "wip $WHOAMI" || true
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "🚀 Pushing changes to '$WIPBRANCH'..."
-        {
+        (
             git push origin "$WIPBRANCH"
             git checkout "$ORIGINALBRANCH"
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "🏁 Done"
     fi
@@ -88,28 +88,28 @@ mob-continue() {
         printf 'log: %s\n' "$LOGFILE"
 
         colorline "🌍 Making sure we are up-to-date with remote..."
-        {
+        (
             git remote update
             git pull --rebase origin "$BRANCH"
             git checkout "$WIPBRANCH"
             git pull --rebase origin "$WIPBRANCH"
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "🔨 Applying changes to our local branch..."
-        {
+        (
             git reset --soft "$ORIGINALBRANCH"
             git restore --staged .
             git stash push --include-untracked .
             git pull --rebase origin "$WIPBRANCH"
             git checkout "$ORIGINALBRANCH"
             git stash pop
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "🔥 Deleting local & remote wip branch..."
-        {
+        (
             git branch -D "$WIPBRANCH"
             git push origin ":$WIPBRANCH"
-        } >> "$LOGFILE" 2>&1
+        ) >> "$LOGFILE" 2>&1
 
         colorline "🏁 Done"
     fi
